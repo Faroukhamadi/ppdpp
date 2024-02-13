@@ -1,3 +1,8 @@
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
 class RewardModel:
     def __init__(self, deal_price, seller_target_price, buyer_target_price):
         self.deal_price = deal_price
@@ -15,3 +20,4 @@ reward = RewardModel(None, None, None)
 
 print(reward.prompt())
 
+# Mr(.) we're using this to transform verbal feedback to scalar rewards
