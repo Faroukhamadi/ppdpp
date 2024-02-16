@@ -1,23 +1,42 @@
-from dotenv import load_dotenv
-
-load_dotenv()
-
-
 class RewardModel:
-    def __init__(self, deal_price, seller_target_price, buyer_target_price):
-        self.deal_price = deal_price
-        self.seller_target_price = seller_target_price
-        self.buyer_target_price = buyer_target_price
+    USER_PROMPT = """
+        Please decide whether the Buyer and the Seller have reached a deal
+        at the end of the conversation. If they have reached a deal, please
+        extract the deal price as [price]. You can only reply with one of
+        the following sentences: They have reached a deal at [price].
+        They have not reached a deal.
+    """
+    SYSTEM_PROMPT = """
+        Given a conversation between a Buyer and a Seller, please decide
+        whether the Buyer and the Seller have reached a deal at the end
+        of the conversation.
+    """
 
-    def prompt(self, text=None):
-        return text if text else "Have they reached a deal?"
+    def __init__(self):
+        self.sample_times = 10
+        self.temperature = 1.1
 
-    def reward(self):
-        return (self.deal_price - self.seller_target_price) / (self.buyer_target_price - self.seller_target_price)
+    def prompt(self, text=None, type="user"):
+        if type == "user":
+            return text if text else self.USER_PROMPT
+        elif type == "system":
+            return self.SYSTEM_PROMPT
+
+    def reward(self, deal_price, seller_price, buyer_price):
+        print("inside reward function")
+        if deal_price is None:
+            print("returning -1")
+            return -1
+        return (deal_price - seller_price) / (buyer_price - seller_price)
 
 
-reward = RewardModel(None, None, None)
+model = RewardModel()
 
-print(reward.prompt())
+examples = {
+    "They have not reached a deal.": -1,
+    "They have reached a deal at 15.": 15,
+}
 
-# Mr(.) we're using this to transform verbal feedback to scalar rewards
+for example in examples:
+    scalar_reward = model.reward(examples[example], 10, 20)
+    print(f"Example: {example}, Scalar Reward: {scalar_reward}")
